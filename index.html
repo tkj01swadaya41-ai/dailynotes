@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOT NEWS 24</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #080808;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.card {
+  width: 100%;
+  max-width: 390px;
+  padding: 25px;
+  border: 1px solid #292929;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #191919, #090909);
+  text-align: center;
+  box-shadow: 0 0 40px #ff202015;
+  animation: masuk .7s ease;
+}
+
+@keyframes masuk {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tag {
+  display: inline-block;
+  padding: 7px 12px;
+  border-radius: 6px;
+  background: #e50914;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  animation: kedip 1.5s infinite;
+}
+
+@keyframes kedip {
+  50% { opacity: .55; }
+}
+
+h1 {
+  margin: 22px 0 10px;
+  font-size: 35px;
+  line-height: 1.1;
+}
+
+h1 span {
+  color: #ff3030;
+}
+
+p {
+  color: #aaa;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+button {
+  width: 100%;
+  margin-top: 15px;
+  padding: 15px;
+  border: 0;
+  border-radius: 10px;
+  background: #e50914;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: .2s;
+}
+
+button:active {
+  transform: scale(.97);
+}
+
+button:disabled {
+  opacity: .6;
+}
+
+.note {
+  font-size: 11px;
+  color: #666;
+  margin-top: 18px;
+}
+
+#kejutan, #loading {
+  display: none;
+}
+
+video {
+  width: 100%;
+  margin-top: 15px;
+  border-radius: 14px;
+  background: #000;
+  transform: scaleX(-1);
+}
+
+#stop {
+  background: #292929;
+}
+
+.bar {
+  height: 5px;
+  margin-top: 20px;
+  background: #333;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.bar div {
+  height: 100%;
+  width: 0;
+  background: #ff3030;
+}
+
+#status {
+  font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <section id="opening">
+    <div class="tag">● BREAKING NEWS</div>
+
+    <h1>HOT NEWS<br><span>HARI INI!</span></h1>
+
+    <p>
+      Ada berita yang lagi viral banget.
+      Katanya, orang yang buka halaman ini
+      bakal menemukan sesuatu yang mengejutkan...
+    </p>
+
+    <button onclick="mulai()">
+      BUKA BERITANYA →
+    </button>
+
+    <div class="note">
+      HOT NEWS 24 • INFORMASI HARI INI
+    </div>
+  </section>
+
+  <section id="loading">
+    <div class="tag">LIVE UPDATE</div>
+    <h1>Menyiapkan <span>kejutan...</span></h1>
+    <p id="proses">Menghubungkan kamera setelah izin diberikan.</p>
+    <div class="bar"><div id="progress"></div></div>
+  </section>
+
+  <section id="kejutan">
+    <div class="tag">BERITA TERKONFIRMASI</div>
+
+    <h1>ANJIRR! <span>LU KETANGKAP!</span></h1>
+
+    <p>
+      Ternyata hot news hari ini adalah...
+      WAJAH LU SENDIRI, BRO! WKWKWK.
+    </p>
+
+    <video id="kamera" autoplay playsinline></video>
+
+    <p id="status">
+      Kamera aktif di perangkat ini.
+    </p>
+
+    <button id="stop" onclick="berhenti()">
+      MATIKAN KAMERA
+    </button>
+  </section>
+
+</div>
+
+<script>
+let stream = null;
+
+async function mulai() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    alert("Buka halaman ini melalui HTTPS di Chrome.");
+    return;
+  }
+
+  try {
+    const opening = document.getElementById("opening");
+    const loading = document.getElementById("loading");
+    const proses = document.getElementById("proses");
+    const progress = document.getElementById("progress");
+
+    opening.style.display = "none";
+    loading.style.display = "block";
+
+    progress.style.width = "35%";
+    proses.textContent = "Menunggu izin kamera dari Chrome...";
+
+    // Chrome akan meminta izin kamera jika diperlukan.
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: "user" }
+      },
+      audio: false
+    });
+
+    progress.style.width = "100%";
+    proses.textContent = "Kamera berhasil diaktifkan!";
+
+    const video = document.getElementById("kamera");
+    video.srcObject = stream;
+
+    await video.play();
+
+    loading.style.display = "none";
+    document.getElementById("kejutan").style.display = "block";
+
+  } catch (error) {
+    loading.style.display = "none";
+    opening.style.display = "block";
+
+    alert(
+      "Kamera belum bisa dibuka. Pastikan izin kamera diberikan " +
+      "dan halaman menggunakan HTTPS."
+    );
+  }
+}
+
+function berhenti() {
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
+  }
+
+  const video = document.getElementById("kamera");
+  video.srcObject = null;
+
+  document.getElementById("kejutan").style.display = "none";
+  document.getElementById("opening").style.display = "block";
+}
+</script>
+
+</body>
+  </html>
